@@ -1,0 +1,33 @@
+{
+	// The mod cannot know which shots are gold and which ones are not for unspotted vehicles
+	// In this case it will asume the following shell types are always gold
+	// Multiple shell types are possible, shell types have to be comma separated
+	// Possble shell types:
+	//     "ARMOR_PIERCING"
+	//     "ARMOR_PIERCING_CR"
+	//     "HOLLOW_CHARGE"
+	//     "HIGH_EXPLOSIVE"
+	// Default: "HOLLOW_CHARGE"
+	"gold_ammo_types_for_unspotted_vehicles": [
+		"HOLLOW_CHARGE"
+	],
+	
+	// Some tanks use one type of shells for both their regular and gold ammo
+	// The mod cannot differentiate between them
+	// If set to true, the mod will always show gold for that shell type, even though it might not be gold
+	// If set to false, the mod will never show gold for that shell type, even though it might be gold
+	// Default: false
+	"display_effect_if_ammo_type_ambiguous": false,
+	
+	// Show the effect for allied shots
+	// Default: false
+	"display_effect_for_allied_shots": false,
+	
+	// Show the effect for enemy shots
+	// Default: true
+	"display_effect_for_enemy_shots": true,
+	
+	// Show the effect for your own shots
+	// Default: false
+	"display_effect_for_own_shots": false
+}
