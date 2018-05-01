@@ -86,9 +86,9 @@ def make_effects_file(zip, file_path, dependency_regex, filtered_dependencies):
 def make_texture(zip, file_path, color_code):
     from wand.image import Image
 
-    red = int(color_code[:2], 16) / 255
-    green = int(color_code[2:4], 16) / 255
-    blue = int(color_code[4:], 16) / 255
+    red = int(color_code[:2], 16) / 255.0
+    green = int(color_code[2:4], 16) / 255.0
+    blue = int(color_code[4:], 16) / 255.0
 
     base_name, extension = file_path.rsplit('.', 1)
 
