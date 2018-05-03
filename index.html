@@ -28,8 +28,7 @@
         <button id="button" class="btn btn-default btn-block"
                 data-create-text="Create"
                 data-creating-text="<i class='fa fa-refresh fa-spin'></i> Creating..."
-                data-downloading-text="<i class='fa fa-refresh fa-spin'></i> Downloading..."
-                data-save-text="Save">
+                data-downloading-text="<i class='fa fa-refresh fa-spin'></i> Downloading...">
         </button>
         <br/>
         <h4>How does this work?</h4>
@@ -94,27 +93,20 @@
     function createDownload() {
         button.button('creating');
         button.prop('disabled', true);
+        colorInput.prop('disabled', true);
         const colorParam = encodeURIComponent(colorInput.val());
         fetch('https://sleepy-hamlet-28159.herokuapp.com/color/' + colorParam).then(response => {
             button.button('downloading');
             return response.blob();
         }).then(blob => {
-            button.button('save');
-            button.one('click', saveDownload(blob));
+            saveBlob(blob, 'goldvisibility.color.wotmod')
         }).catch(err => {
-            button.button('create');
-            pushError(err || 'Somethign went wrong.');
+            pushError(err || 'Something went wrong.');
         }).finally(() => {
-            button.prop('disabled', false);
-        });
-    }
-
-    function saveDownload(blob) {
-        return function () {
-            saveBlob(blob, 'goldvisibility.color.wotmod');
             button.button('create');
-            button.one('click', createDownload);
-        };
+            button.prop('disabled', false);
+            colorInput.prop('disabled', false);
+        });
     }
 
     button.one('click', createDownload);
