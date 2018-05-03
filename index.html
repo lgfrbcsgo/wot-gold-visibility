@@ -23,7 +23,7 @@
         <h2>Gold Visibility Color Creator</h2>
         <br/>
         <div id="errors"></div>
-        <input type="text" class="form-control" id="color-input" value="rgb(192, 0, 255, 1)">
+        <input type="text" class="form-control" id="color-input" value="rgb(255, 0, 0, 1)">
         <br/>
         <button id="button" class="btn btn-default btn-block"
                 data-create-text="Create"
@@ -63,7 +63,19 @@
     colorInput.minicolors({
         format: 'rgb',
         opacity: true,
-        theme: 'bootstrap'
+        theme: 'bootstrap',
+        swatches: [
+            '#0056FF',
+            '#0095FF',
+            '#00FFFF',
+            '#00F000',
+            '#6BFF00',
+            '#C000FF',
+            '#FF00F4',
+            '#FF0000',
+            '#FF9000',
+            '#FFF700'
+        ]
     });
 
     const button = $('#button');
