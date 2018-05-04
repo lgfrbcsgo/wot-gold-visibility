@@ -7,16 +7,34 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
     <!-- Bootstrap 3 -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+            crossorigin="anonymous"></script>
 
-    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"
+          integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
 
     <!-- MiniColors -->
     <script src="jquery.minicolors.min.js"></script>
     <link rel="stylesheet" href="jquery.minicolors.css">
 
-    <link id="favicon" rel="icon" type="image/x-icon" />
+    <link id="favicon" rel="icon" type="image/x-icon"/>
+
+    <style>
+        [hidden] {
+            display: none !important;
+        }
+
+        #remove-file {
+            cursor: pointer;
+        }
+
+        label.btn-link {
+            padding-left: 0;
+        }
+    </style>
 </head>
 <body>
 
@@ -26,7 +44,14 @@
         <br/>
         <div id="errors"></div>
         <input type="text" class="form-control" id="color-input" value="#BADA55">
+
         <br/>
+        <label class="btn btn-link">
+            Upload shape <span class="badge">optional</span> <input id="file-input" type="file" hidden>
+        </label>
+        <span id="file-name"></span> <span id="remove-file" class="fa fa-close" style="display: none"></span>
+
+        <br/><br/>
         <button id="button" class="btn btn-default btn-block"
                 data-create-text="Create"
                 data-creating-text="<i class='fa fa-refresh fa-spin'></i> Creating..."
@@ -35,10 +60,21 @@
         <br/>
         <h4>How does this work?</h4>
         <ol>
-            <li>Download and install the Gold Visibility Mod from <a href="https://wgmods.net/1233" target="_blank">WG Mods</a> or the
-                <a href="http://forum.worldoftanks.eu/index.php?/topic/669824-1010-gold-ammo-visibility-mod-204/" target="_blank">European forum</a>. Any color will work.</li>
-            <li>Select a color in the color picker above. Click on "Create" and wait for the process to finish. <strong>This can take up to a minute!</strong></li>
-            <li>Click on "Save" to save the .wotmod file to your computer.</li>
+            <li>Download and install the Gold Visibility Mod from <a href="https://wgmods.net/1233" target="_blank">WG
+                Mods</a> or the
+                <a href="http://forum.worldoftanks.eu/index.php?/topic/669824-1010-gold-ammo-visibility-mod-204/"
+                   target="_blank">European forum</a>. Any color will work.
+            </li>
+            <li>Select a color in the color picker above.</li>
+            <li><em>Optional:</em> You can also upload a shape which will replace the smoke effects.
+                The effect will have the color selected above. The recommended image format is PNG.
+                <strong>The background of the image must be transparent!</strong>
+                Check out <a href="https://www.flaticon.com/" target="_blank">Flaticon.com</a> for a huge selection of
+                free shapes and icons.
+            </li>
+            <li>Click on "Create" and wait for the process to finish. <strong>This can take up to a minute!</strong>
+            </li>
+            <li>Save the generated .wotmod file to your computer.</li>
             <li>Copy the file into your WoT <strong>/mods/&lt;current version&gt;</strong> folder.</li>
         </ol>
     </div>
@@ -46,8 +82,11 @@
 
 
 <script>
-    const button = $('#button');
+    const createButton = $('#button');
     const errors = $('#errors');
+    const fileInput = $('#file-input');
+    const fileName = $('#file-name');
+    const removeFile = $('#remove-file');
     const colorInput = $('#color-input');
     colorInput.minicolors({
         format: 'rgb',
@@ -100,35 +139,88 @@
     function pushError(errorMsg) {
         errors.append(`
             <div class="alert alert-danger alert-dismissible" role="alert">
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
-                        aria-hidden="true">&times;</span></button>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span class="fa fa-close"></span>
+                </button>
                 <strong>Error!</strong> ${errorMsg}
             </div>
         `);
     }
 
-    function createDownload() {
-        button.button('creating');
-        button.prop('disabled', true);
-        colorInput.prop('disabled', true);
-        const colorParam = encodeURIComponent(colorInput.val());
-        fetch('https://sleepy-hamlet-28159.herokuapp.com/color/' + colorParam).then(response => {
-            button.button('downloading');
-            return response.blob();
-        }).then(blob => {
-            saveBlob(blob, 'goldvisibility.color.wotmod')
-        }).catch(err => {
-            pushError(err || 'Something went wrong.');
-        }).finally(() => {
-            button.button('create');
-            button.prop('disabled', false);
+    const status = {
+        creating: () => {
+            createButton.button('creating');
+            createButton.prop('disabled', true);
+            colorInput.prop('disabled', true);
+        },
+        downloading: () => {
+            createButton.button('downloading');
+        },
+        reset: () => {
+            createButton.button('create');
+            createButton.prop('disabled', false);
             colorInput.prop('disabled', false);
-        });
+        }
+    };
+
+    function handleError(err) {
+        status.reset();
+        pushError(err || 'Something went wrong.');
     }
 
+    const SERVICE_URL = 'https://sleepy-hamlet-28159.herokuapp.com';
+
+    function createJob() {
+        status.creating();
+        const colorParam = encodeURIComponent(colorInput.val());
+
+        const icon = fileInput.prop('files')[0];
+        let options = undefined;
+        if (icon) {
+            const formData = new FormData();
+            formData.append('file', icon);
+            options = {
+                method: 'POST',
+                body: formData
+            };
+        }
+
+        fetch(SERVICE_URL + '/color/' + colorParam, options).then(response => {
+            return response.text();
+        }).then(jobId => {
+            pollResult(jobId);
+        }).catch(handleError);
+    }
+
+    function pollResult(jobId) {
+        fetch(SERVICE_URL + '/status/' + jobId).then(response => {
+            if (response.status === 202) {
+                setTimeout(() => pollResult(jobId), 2000);
+            } else {
+                status.downloading();
+                return response.blob();
+            }
+        }).then(blob => {
+            if (!blob) return;
+            saveBlob(blob, 'goldvisibility.color.wotmod');
+            status.reset();
+        }).catch(handleError);
+    }
+
+    status.reset();
     renderFavicon(colorInput.val());
-    button.on('click', createDownload);
-    button.button('create')
+    createButton.on('click', createJob);
+
+    fileInput.on('change', () => {
+        fileName.text(fileInput.val().split(/(\\|\/)/g).pop());
+        removeFile.show();
+    });
+
+    removeFile.on('click', () => {
+        removeFile.hide();
+        fileInput.val('');
+        fileName.text('');
+    });
 </script>
 
 </body>
