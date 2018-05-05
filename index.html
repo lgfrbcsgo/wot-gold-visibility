@@ -27,10 +27,6 @@
             display: none !important;
         }
 
-        #remove-file {
-            cursor: pointer;
-        }
-
         label.btn-link {
             padding-left: 0;
         }
@@ -44,16 +40,24 @@
         <br/>
         <div id="errors"></div>
         <input type="text" class="form-control" id="color-input" value="#BADA55">
-
         <br/>
         <label class="btn btn-link">
             Upload shape <span class="badge">optional</span> <input id="file-input" type="file" hidden>
         </label>
-        <span id="file-name"></span> <span id="remove-file" class="fa fa-close" style="display: none"></span>
-
-        <br/><br/>
+        <span id="file-name"></span>
+        <button id="remove-file" class="btn btn-xs btn-default" style="display: none">
+            <span class="fa fa-close"></span>
+        </button>
+        <br/>
+        <div class="checkbox" id="keep-color" style="display: none">
+            <label>
+                <input type="checkbox"> Keep the original color of the shape
+            </label>
+        </div>
+        <br/>
         <button id="button" class="btn btn-default btn-block"
                 data-create-text="Create"
+                data-waiting-text="<i class='fa fa-refresh fa-spin'></i> Waiting for queue..."
                 data-creating-text="<i class='fa fa-refresh fa-spin'></i> Creating..."
                 data-downloading-text="<i class='fa fa-refresh fa-spin'></i> Downloading...">
         </button>
@@ -87,6 +91,7 @@
     const fileInput = $('#file-input');
     const fileName = $('#file-name');
     const removeFile = $('#remove-file');
+    const keepColor = $('#keep-color');
     const colorInput = $('#color-input');
     colorInput.minicolors({
         format: 'rgb',
@@ -147,20 +152,24 @@
         `);
     }
 
+    function makeStatus(name, inputDisabled) {
+        return function () {
+            if (this.currentStatus === name) return;
+            createButton.button(name);
+            createButton.prop('disabled', inputDisabled);
+            colorInput.prop('disabled', inputDisabled || keepColor.find('input').prop('checked'));
+            fileInput.prop('disabled', inputDisabled);
+            keepColor.find('input').prop('disabled', inputDisabled);
+            removeFile.prop('disabled', inputDisabled);
+            this.currentStatus = name;
+        };
+    }
+
     const status = {
-        creating: () => {
-            createButton.button('creating');
-            createButton.prop('disabled', true);
-            colorInput.prop('disabled', true);
-        },
-        downloading: () => {
-            createButton.button('downloading');
-        },
-        reset: () => {
-            createButton.button('create');
-            createButton.prop('disabled', false);
-            colorInput.prop('disabled', false);
-        }
+        waiting: makeStatus('waiting', true),
+        creating: makeStatus('creating', true),
+        downloading: makeStatus('downloading', true),
+        reset: makeStatus('create', false)
     };
 
     function handleError(err) {
@@ -172,36 +181,57 @@
 
     function createJob() {
         status.creating();
-        const colorParam = encodeURIComponent(colorInput.val());
 
-        const icon = fileInput.prop('files')[0];
-        let options = undefined;
-        if (icon) {
+        const makeBody = file => {
             const formData = new FormData();
-            formData.append('file', icon);
-            options = {
-                method: 'POST',
-                body: formData
-            };
+            formData.append('file', file);
+            return formData;
+        };
+
+        const options = {};
+        const icon = fileInput.prop('files')[0];
+        if (icon) {
+            options.method = 'POST';
+            options.body = makeBody(icon);
         }
 
-        fetch(SERVICE_URL + '/color/' + colorParam, options).then(response => {
-            return response.text();
-        }).then(jobId => {
-            pollResult(jobId);
+        const params = {
+            color: !keepColor.find('input').prop('checked') ? colorInput.val() : undefined
+        };
+        const query = Object.keys(params).filter(k => {
+            return params[k] !== undefined && params[k] !== '';
+        }).map(k => {
+            return encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
+        }).join('&');
+
+        fetch(SERVICE_URL + '/create?' + query, options).then(response => {
+            return response.json();
+        }).then(obj => {
+            if (obj.status === 'error') throw obj.errorMsg;
+            status.waiting();
+            pollStatus(obj.jobId);
         }).catch(handleError);
     }
 
-    function pollResult(jobId) {
+    function pollStatus(jobId) {
         fetch(SERVICE_URL + '/status/' + jobId).then(response => {
-            if (response.status === 202) {
-                setTimeout(() => pollResult(jobId), 2000);
-            } else {
-                status.downloading();
-                return response.blob();
-            }
+            return response.json();
+        }).then(obj => {
+            if (obj.status === 'error') throw obj.errorMsg;
+
+            if (obj.status === 'finished') return getResult(jobId);
+
+            if (obj.status === 'created') status.waiting();
+            if (obj.status === 'started') status.creating();
+            setTimeout(() => pollStatus(jobId), 1000);
+        }).catch(handleError);
+    }
+
+    function getResult(jobId) {
+        fetch(SERVICE_URL + '/download/' + jobId).then(response => {
+            status.downloading();
+            return response.blob();
         }).then(blob => {
-            if (!blob) return;
             saveBlob(blob, 'goldvisibility.color.wotmod');
             status.reset();
         }).catch(handleError);
@@ -214,12 +244,19 @@
     fileInput.on('change', () => {
         fileName.text(fileInput.val().split(/(\\|\/)/g).pop());
         removeFile.show();
+        keepColor.show();
     });
 
     removeFile.on('click', () => {
+        keepColor.find('input').prop('checked', false);
+        keepColor.hide();
         removeFile.hide();
         fileInput.val('');
         fileName.text('');
+    });
+
+    keepColor.find('input').on('change', function () {
+        colorInput.prop('disabled', this.checked);
     });
 </script>
 
