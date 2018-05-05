@@ -268,7 +268,7 @@
     });
 
     if (location.hash !== undefined && location.hash !== '') {
-        status.sending();
+        status.waiting();
         pollStatus(location.hash.substring(1));
     }
 </script>
