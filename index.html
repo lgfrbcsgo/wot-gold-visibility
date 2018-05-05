@@ -42,13 +42,13 @@
         <input type="text" class="form-control" id="color-input" value="#BADA55">
         <br/>
         <label class="btn btn-link">
-            Upload shape <span class="badge">optional</span> <input id="file-input" type="file" hidden>
+            Upload shape <span class="badge">optional</span> <input id="file-input" type="file" accept=".png,.tiff,.tga,.dds,.jpg,.jpeg" hidden>
         </label>
         <span id="file-name"></span>
         <button id="remove-file" class="btn btn-xs btn-default" style="display: none">
             <span class="fa fa-close"></span>
         </button>
-        <br/>
+        <p class="help-block">Maximum image size: 200 KB, up to 512x512 pixel. PNG format recommended.</p>
         <div class="checkbox" id="keep-color" style="display: none">
             <label>
                 <input type="checkbox"> Keep the original color of the shape
