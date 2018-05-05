@@ -77,7 +77,7 @@
                 Check out <a href="https://www.flaticon.com/" target="_blank">Flaticon.com</a> for a huge selection of
                 free shapes and icons.
             </li>
-            <li>Click on "Create" and wait for the process to finish. <strong>This can take up to a minute!</strong>
+            <li>Click on "Create" and wait for the process to finish. <strong>This can take up to 100 seconds!</strong>
             </li>
             <li>Save the generated .wotmod file to your computer.</li>
             <li>Copy the file into your WoT <strong>/mods/&lt;current version&gt;</strong> folder.</li>
@@ -243,6 +243,8 @@
     createButton.on('click', createJob);
 
     fileInput.on('change', () => {
+        keepColor.find('input').prop('checked', true);
+        colorInput.prop('disabled', true);
         fileName.text(fileInput.val().split(/(\\|\/)/g).pop());
         removeFile.show();
         keepColor.show();
@@ -250,6 +252,7 @@
 
     removeFile.on('click', () => {
         keepColor.find('input').prop('checked', false);
+        colorInput.prop('disabled', false);
         keepColor.hide();
         removeFile.hide();
         fileInput.val('');
