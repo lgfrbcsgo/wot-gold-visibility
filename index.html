@@ -210,6 +210,7 @@
             return response.json();
         }).then(obj => {
             if (obj.status === 'error') throw obj.errorMsg;
+            location.hash = obj.jobId;
             pollStatus(obj.jobId);
         }).catch(handleError);
     }
@@ -262,6 +263,11 @@
     keepColor.find('input').on('change', function () {
         colorInput.prop('disabled', this.checked);
     });
+
+    if (location.hash !== undefined && location.hash !== '') {
+        status.sending();
+        pollStatus(location.hash.substring(1));
+    }
 </script>
 
 </body>
