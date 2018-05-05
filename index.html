@@ -154,7 +154,10 @@
     }
 
     function makeStatus(name, inputDisabled) {
-        return function () {
+        return function (hash) {
+            if (hash !== undefined) {
+                location.hash = hash;
+            }
             if (this.currentStatus === name) return;
             createButton.button(name);
             createButton.prop('disabled', inputDisabled);
@@ -171,11 +174,11 @@
         waiting: makeStatus('waiting', true),
         creating: makeStatus('creating', true),
         downloading: makeStatus('downloading', true),
-        reset: makeStatus('create', false)
+        reset: makeStatus('create', false, '')
     };
 
     function handleError(err) {
-        status.reset();
+        status.reset('');
         pushError(err || 'Something went wrong.');
     }
 
@@ -235,7 +238,7 @@
             return response.blob();
         }).then(blob => {
             saveBlob(blob, 'goldvisibility.color.wotmod');
-            status.reset();
+            status.reset('');
         }).catch(handleError);
     }
 
