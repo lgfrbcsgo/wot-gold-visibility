@@ -57,6 +57,7 @@
         <br/>
         <button id="button" class="btn btn-default btn-block"
                 data-create-text="Create"
+                data-sending-text="<i class='fa fa-refresh fa-spin'></i> Creating job..."
                 data-waiting-text="<i class='fa fa-refresh fa-spin'></i> Waiting for queue..."
                 data-creating-text="<i class='fa fa-refresh fa-spin'></i> Creating..."
                 data-downloading-text="<i class='fa fa-refresh fa-spin'></i> Downloading...">
@@ -166,6 +167,7 @@
     }
 
     const status = {
+        sending: makeStatus('sending', true),
         waiting: makeStatus('waiting', true),
         creating: makeStatus('creating', true),
         downloading: makeStatus('downloading', true),
@@ -180,7 +182,7 @@
     const SERVICE_URL = 'https://sleepy-hamlet-28159.herokuapp.com';
 
     function createJob() {
-        status.waiting();
+        status.sending();
 
         const makeBody = file => {
             const formData = new FormData();
