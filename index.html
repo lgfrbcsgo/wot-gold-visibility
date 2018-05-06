@@ -278,6 +278,7 @@
     createButton.on('click', createJob);
 
     fileInput.on('change', function () {
+        colorInput.prop('disabled', $('input:checked', fillMethodInputs).val() === 'none');
         fileName.text(fileInput.val().split(/(\\|\/)/g).pop());
         removeFile.show();
         fillMethodInputs.show();
