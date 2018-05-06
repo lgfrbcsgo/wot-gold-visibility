@@ -39,7 +39,7 @@
         <h2>Gold Visibility Color Creator</h2>
         <br/>
         <div id="errors"></div>
-        <input type="text" class="form-control" id="color-input" value="#FF0000">
+        <input type="text" class="form-control" id="color-input" value="rgba(192, 0, 255, 1)">
         <br/>
         <label class="btn btn-link">
             Upload shape <span class="badge">optional</span> <input id="file-input" type="file"
@@ -50,10 +50,16 @@
             <span class="fa fa-close"></span>
         </button>
         <p class="help-block">Maximum image size: 200 KB, up to 512x512 pixels. PNG is recommended.</p>
-        <div class="checkbox" id="keep-color" style="display: none">
-            <br/>
-            <label>
-                <input type="checkbox"> <strong>Do not fill the shape</strong> - keep the original color of the image
+        <div id="fill-method-inputs" style="display: none">
+            <label class="radio control-label">Image fill method</label>
+            <label class="radio-inline"><input type="radio" name="fillmethod" value="none" checked>
+                Do not fill
+            </label>
+            <label class="radio-inline">
+                <input type="radio" name="fillmethod" value="solid">Fill with solid color
+            </label>
+            <label class="radio-inline"><input type="radio" name="fillmethod" value="luminize">
+                Luminize
             </label>
         </div>
         <br/>
@@ -104,9 +110,11 @@
     const fileInput = $('#file-input');
     const fileName = $('#file-name');
     const removeFile = $('#remove-file');
-    const keepColor = $('#keep-color');
+    const fillMethodInputs = $('#fill-method-inputs');
     const colorInput = $('#color-input');
     colorInput.minicolors({
+        format: 'rgb',
+        opacity: true,
         theme: 'bootstrap',
         swatches: [
             '#0056FF',
@@ -138,13 +146,18 @@
         favicon.attr('href', canvas.toDataURL());
     }
 
-    let msDownloadHandler = function () {};
-    downloadLink.find('a').on('click', function () { msDownloadHandler() });
+    let msDownloadHandler = function () {
+    };
+    downloadLink.find('a').on('click', function () {
+        msDownloadHandler()
+    });
 
     function saveBlob(blob, fileName) {
         if (window.navigator.msSaveOrOpenBlob) {
             window.navigator.msSaveOrOpenBlob(blob, fileName);
-            msDownloadHandler = function () { saveBlob(blob, fileName) };
+            msDownloadHandler = function () {
+                saveBlob(blob, fileName)
+            };
         } else {
             const url = window.URL.createObjectURL(blob);
             const a = downloadLink.find('a').get(0);
@@ -175,9 +188,9 @@
             if (this.currentStatus === name) return;
             createButton.button(name);
             createButton.prop('disabled', inputDisabled);
-            colorInput.prop('disabled', inputDisabled || keepColor.find('input').prop('checked'));
+            colorInput.prop('disabled', inputDisabled || $('input:checked', fillMethodInputs).val() === 'none' && fileInput.prop('files')[0]);
             fileInput.prop('disabled', inputDisabled);
-            keepColor.find('input').prop('disabled', inputDisabled);
+            $('input', fillMethodInputs).prop('disabled', inputDisabled);
             removeFile.prop('disabled', inputDisabled);
             this.currentStatus = name;
         };
@@ -215,9 +228,10 @@
             options.body = makeBody(icon);
         }
 
-        const params = {
-            color: !keepColor.find('input').prop('checked') ? colorInput.val() : undefined
-        };
+        const params = {};
+        params.color = $('input:checked', fillMethodInputs).val() !== 'none' || !icon ? colorInput.val() : undefined;
+        if ($('input:checked', fillMethodInputs).val() === 'luminize' && icon) params.luminize = true;
+
         const query = Object.keys(params).filter(k => {
             return params[k] !== undefined && params[k] !== '';
         }).map(k => {
@@ -243,7 +257,9 @@
 
             if (obj.status === 'created') status.waiting();
             if (obj.status === 'started') status.creating();
-            setTimeout(function () { pollStatus(jobId) }, 1000);
+            setTimeout(function () {
+                pollStatus(jobId)
+            }, 1000);
         }).catch(handleError);
     }
 
@@ -261,25 +277,24 @@
     renderFavicon(colorInput.val());
     createButton.on('click', createJob);
 
-    fileInput.on('change',function () {
-        keepColor.find('input').prop('checked', true);
+    fileInput.on('change', function () {
         colorInput.prop('disabled', true);
         fileName.text(fileInput.val().split(/(\\|\/)/g).pop());
         removeFile.show();
-        keepColor.show();
+        fillMethodInputs.show();
     });
 
     removeFile.on('click', function () {
-        keepColor.find('input').prop('checked', false);
         colorInput.prop('disabled', false);
-        keepColor.hide();
+        $('input', fillMethodInputs).first().prop('checked', true);
+        fillMethodInputs.hide();
         removeFile.hide();
         fileInput.val('');
         fileName.text('');
     });
 
-    keepColor.find('input').on('change', function () {
-        colorInput.prop('disabled', this.checked);
+    fillMethodInputs.on('change', function () {
+        colorInput.prop('disabled', $('input:checked', fillMethodInputs).val() === 'none');
     });
 
     if (location.hash !== undefined && location.hash !== '') {
