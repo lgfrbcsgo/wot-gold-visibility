@@ -189,7 +189,7 @@
             if (this.currentStatus === name) return;
             createButton.button(name);
             createButton.prop('disabled', inputDisabled);
-            colorInput.prop('disabled', inputDisabled || $('input:checked', fillMethodInputs).val() === 'none' && fileInput.prop('files')[0]);
+            colorInput.prop('disabled', inputDisabled || ($('input:checked', fillMethodInputs).val() === 'none' && !!fileInput.prop('files')[0]));
             fileInput.prop('disabled', inputDisabled);
             $('input', fillMethodInputs).prop('disabled', inputDisabled);
             removeFile.prop('disabled', inputDisabled);
