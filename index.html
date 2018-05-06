@@ -39,7 +39,7 @@
         <h2>Gold Visibility Color Creator</h2>
         <br/>
         <div id="errors"></div>
-        <input type="text" class="form-control" id="color-input" value="rgba(192, 0, 255, 1)">
+        <input type="text" class="form-control" id="color-input" value="#FF0000">
         <br/>
         <label class="btn btn-link">
             Upload shape <span class="badge">optional</span> <input id="file-input" type="file"
@@ -107,8 +107,6 @@
     const keepColor = $('#keep-color');
     const colorInput = $('#color-input');
     colorInput.minicolors({
-        format: 'rgb',
-        opacity: true,
         theme: 'bootstrap',
         swatches: [
             '#0056FF',
