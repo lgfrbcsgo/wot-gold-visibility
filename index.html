@@ -42,7 +42,8 @@
         <input type="text" class="form-control" id="color-input" value="rgba(192, 0, 255, 1)">
         <br/>
         <label class="btn btn-link">
-            Upload shape <span class="badge">optional</span> <input id="file-input" type="file" accept=".png,.tiff,.tga,.dds" hidden>
+            Upload shape <span class="badge">optional</span> <input id="file-input" type="file"
+                                                                    accept=".png,.tiff,.tga,.dds" hidden>
         </label>
         <span id="file-name"></span>
         <button id="remove-file" class="btn btn-xs btn-default" style="display: none">
@@ -50,6 +51,7 @@
         </button>
         <p class="help-block">Maximum image size: 200 KB, up to 512x512 pixels. PNG is recommended.</p>
         <div class="checkbox" id="keep-color" style="display: none">
+            <br/>
             <label>
                 <input type="checkbox"> <strong>Do not fill the shape</strong> - keep the original color of the image
             </label>
@@ -62,8 +64,12 @@
                 data-creating-text="<i class='fa fa-refresh fa-spin'></i> Creating file..."
                 data-downloading-text="<i class='fa fa-refresh fa-spin'></i> Downloading...">
         </button>
+        <div id="download-link" style="display: none">
+            <br/>
+            <a href="#">Download failed? Try again.</a>
+        </div>
         <br/>
-        <h4>How does this work?</h4>
+        <h4>Usage</h4>
         <ol>
             <li>Download and install the Gold Visibility Mod from <a href="https://wgmods.net/1233" target="_blank">WG
                 Mods</a> or the
@@ -85,7 +91,7 @@
         <h4>Troubleshooting</h4>
         <ul>
             <li>Make sure to use a modern browser like Chrome or Firefox.</li>
-            <li>The automatic download will not work in Edge, try again in an other browser.</li>
+            <li>Click the link below the "Create" button should the automatic download not work.</li>
         </ul>
     </div>
 </div>
@@ -93,6 +99,7 @@
 
 <script>
     const createButton = $('#button');
+    const downloadLink = $('#download-link');
     const errors = $('#errors');
     const fileInput = $('#file-input');
     const fileName = $('#file-name');
@@ -133,19 +140,23 @@
         favicon.attr('href', canvas.toDataURL());
     }
 
-    // https://gist.github.com/philipstanislaus/c7de1f43b52531001412
-    const saveBlob = (function () {
-        const a = document.createElement("a");
-        document.body.appendChild(a);
-        a.style = "display: none";
-        return function (blob, fileName) {
+    let msDownloadHandler = function () {};
+    downloadLink.find('a').on('click', function () { msDownloadHandler() });
+
+    function saveBlob(blob, fileName) {
+        if (window.navigator.msSaveOrOpenBlob) {
+            window.navigator.msSaveOrOpenBlob(blob, fileName);
+            msDownloadHandler = function () { saveBlob(blob, fileName) };
+        } else {
             const url = window.URL.createObjectURL(blob);
+            const a = downloadLink.find('a').get(0);
             a.href = url;
             a.download = fileName;
             a.click();
             window.URL.revokeObjectURL(url);
-        };
-    }());
+        }
+        downloadLink.show();
+    }
 
     function pushError(errorMsg) {
         errors.append(`
@@ -191,6 +202,7 @@
 
     function createJob() {
         status.sending();
+        downloadLink.hide();
 
         const makeBody = file => {
             const formData = new FormData();
@@ -233,7 +245,7 @@
 
             if (obj.status === 'created') status.waiting();
             if (obj.status === 'started') status.creating();
-            setTimeout(() => pollStatus(jobId), 1000);
+            setTimeout(function () { pollStatus(jobId) }, 1000);
         }).catch(handleError);
     }
 
@@ -251,7 +263,7 @@
     renderFavicon(colorInput.val());
     createButton.on('click', createJob);
 
-    fileInput.on('change', () => {
+    fileInput.on('change',function () {
         keepColor.find('input').prop('checked', true);
         colorInput.prop('disabled', true);
         fileName.text(fileInput.val().split(/(\\|\/)/g).pop());
@@ -259,7 +271,7 @@
         keepColor.show();
     });
 
-    removeFile.on('click', () => {
+    removeFile.on('click', function () {
         keepColor.find('input').prop('checked', false);
         colorInput.prop('disabled', false);
         keepColor.hide();
