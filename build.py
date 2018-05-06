@@ -85,22 +85,17 @@ def make_effects_file(zip, file_path, dependency_regex, filtered_dependencies):
 
 def make_texture(zip, file_path, color_code):
     from wand.image import Image
-
-    red = int(color_code[:2], 16) / 255.0
-    green = int(color_code[2:4], 16) / 255.0
-    blue = int(color_code[4:], 16) / 255.0
+    from wand.drawing import Drawing
+    from wand.color import Color
 
     base_name, extension = file_path.rsplit('.', 1)
 
-    with zip.open(file_path, 'r') as zipped_file:
-        with Image(file=zipped_file, format=extension) as img:
-            img.threshold(-1, 'red')
-            img.threshold(-1, 'green')
-            img.threshold(-1, 'blue')
-            img.evaluate('multiply', red, channel='red')
-            img.evaluate('multiply', green, channel='green')
-            img.evaluate('multiply', blue, channel='blue')
-            return base_name + '_prem.' + extension, img.make_blob()
+    with zip.open(file_path, 'r') as zipped_file, Image(file=zipped_file, format=extension) as img, Drawing() as draw:
+        draw.fill_color = Color('#%s' % color_code)
+        draw.color(0, 0, 'reset')
+        draw.composite('copy_opacity', 0, 0, img.width, img.height, img)
+        draw(img)
+        return base_name + '_prem.' + extension, img.make_blob()
 
 
 def make_goldvisibility_core(particles_pkg_path):
