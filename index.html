@@ -278,7 +278,6 @@
     createButton.on('click', createJob);
 
     fileInput.on('change', function () {
-        colorInput.prop('disabled', true);
         fileName.text(fileInput.val().split(/(\\|\/)/g).pop());
         removeFile.show();
         fillMethodInputs.show();
