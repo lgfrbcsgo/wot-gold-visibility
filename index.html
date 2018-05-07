@@ -222,12 +222,9 @@
             return formData;
         };
 
-        const options = {};
+        const options = { method: "POST" };
         const icon = fileInput.prop('files')[0];
-        if (icon) {
-            options.method = 'POST';
-            options.body = makeBody(icon);
-        }
+        if (icon) options.body = makeBody(icon);
 
         const params = {};
         params.color = $('input:checked', fillMethodInputs).val() !== 'none' || !icon ? colorInput.val() : undefined;
