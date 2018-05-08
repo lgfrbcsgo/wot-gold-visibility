@@ -260,7 +260,7 @@
             if (obj.status === 'started') status.creating();
             setTimeout(function () {
                 pollStatus(jobId)
-            }, 1000);
+            }, 2500);
         }).catch(handleError);
     }
 
