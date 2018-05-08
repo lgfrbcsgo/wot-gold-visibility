@@ -6,23 +6,10 @@
 
     <title>Gold Visibility Color Creator</title>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link id="favicon" rel="icon" type="image/x-icon"/>
 
-    <!-- Bootstrap 3 -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
           integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
-            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
-            crossorigin="anonymous"></script>
-
-    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"
-          integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
-
-    <!-- MiniColors -->
-    <script src="jquery.minicolors.min.js"></script>
-    <link rel="stylesheet" href="jquery.minicolors.css">
-
-    <link id="favicon" rel="icon" type="image/x-icon"/>
 
     <style>
         [hidden] {
@@ -79,17 +66,19 @@
         <br/>
         <h4>Usage</h4>
         <ol>
-            <li>Download and install the Gold Visibility Mod from <a href="https://wgmods.net/1233" target="_blank">WG
+            <li>Download and install the Gold Visibility Mod from <a href="https://wgmods.net/1233" target="_blank"
+                                                                     rel="noopener">WG
                 Mods</a> or the
                 <a href="http://forum.worldoftanks.eu/index.php?/topic/669824-1010-gold-ammo-visibility-mod-204/"
-                   target="_blank">European forum</a>. Any color will work.
+                   target="_blank" rel="noopener">European forum</a>. Any color will work.
             </li>
             <li>Select a color in the color picker above.</li>
             <li>Optional: You can also upload an image which will replace the smoke effects.
                 The effect will have the color selected above.
                 For the best results the background of the image should be transparent.
                 The recommended image format is PNG as it allows for transparency.
-                Check out <a href="https://www.flaticon.com/" target="_blank">Flaticon.com</a> for a huge selection of
+                Check out <a href="https://www.flaticon.com/" target="_blank" rel="noopener">Flaticon.com</a> for a huge
+                selection of
                 free shapes and icons.
             </li>
             <li>Click on "Create" and wait for the process to finish. <strong>This can take up to a minute!</strong>
@@ -105,6 +94,20 @@
     </div>
 </div>
 
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<!-- Bootstrap 3 -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+        integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+        crossorigin="anonymous"></script>
+
+<link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"
+      integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+
+<!-- MiniColors -->
+<script src="jquery.minicolors.min.js"></script>
+<link rel="stylesheet" href="jquery.minicolors.css">
 
 <script>
     const createButton = $('#button');
@@ -224,7 +227,7 @@
             return formData;
         };
 
-        const options = { method: "POST" };
+        const options = {method: "POST"};
         const icon = fileInput.prop('files')[0];
         if (icon) options.body = makeBody(icon);
 
