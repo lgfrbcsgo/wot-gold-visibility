@@ -21,7 +21,7 @@
             <br/>
             <h2>Gold Visibility Color Creator</h2>
             <br/>
-            <error-box v-for="(errorMsg, index) in errors" :error-msg="errorMsg" @close="popError(index)"></error-box>
+            <error-box v-for="(errorMsg, index) in errors" :key="index" :error-msg="errorMsg" @close="popError(index)"></error-box>
             <color-input-group v-model="input" :disabled="disabled"></color-input-group>
             <button class="btn btn-block btn-primary" @click="createJob" :disabled="disabled">
                 <span v-show="showSpinner" class="fa fa-refresh fa-spin" style="margin-right: 5px"></span>
@@ -63,10 +63,12 @@
 
 <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
 <script src="lib/vue-color.min.js"></script>
+
 <script src="components/color-picker.component.js"></script>
 <script src="components/color-input.component.js"></script>
 <script src="components/color-input-group.component.js"></script>
 <script src="components/error-box.component.js"></script>
+
 <script src="app.js"></script>
 </body>
 </html>
