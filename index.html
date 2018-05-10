@@ -8,102 +8,69 @@
 
     <link id="favicon" rel="icon" type="image/x-icon"/>
 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
-          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css"
+          integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
     <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"
-      integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
-
-    <link rel="stylesheet" href="lib/jquery.minicolors.css">
-
-    <style>
-        [hidden] {
-            display: none !important;
-        }
-
-        label.btn-link {
-            padding-left: 0;
-        }
-    </style>
+          integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
 </head>
 <body>
 
-<div class="container">
-    <div class="col-sm-6 col-sm-offset-3">
-        <h2>Gold Visibility Color Creator</h2>
-        <br/>
-        <div id="errors"></div>
-        <input type="text" class="form-control" id="color-input" value="rgba(192, 0, 255, 1)">
-        <br/>
-        <label class="btn btn-link">
-            Upload image <span class="badge">optional</span> <input id="file-input" type="file"
-                                                                    accept=".png,.tiff,.tga,.dds" hidden>
-        </label>
-        <span id="file-name"></span>
-        <button id="remove-file" class="btn btn-xs btn-default" style="display: none">
-            <span class="fa fa-close"></span>
-        </button>
-        <p class="help-block">Maximum image size: 200 KB, up to 512x512 pixels. PNG is recommended.</p>
-        <div id="fill-method-inputs" style="display: none">
-            <label class="radio control-label">Image fill method</label>
-            <label class="radio-inline"><input type="radio" name="fillmethod" value="none" checked>
-                Do not fill
-            </label>
-            <label class="radio-inline">
-                <input type="radio" name="fillmethod" value="solid">Fill with solid color
-            </label>
-            <label class="radio-inline"><input type="radio" name="fillmethod" value="luminize">
-                Luminize
-            </label>
-        </div>
-        <br/>
-        <button id="button" class="btn btn-default btn-block"
-                data-create-text="Create"
-                data-sending-text="<i class='fa fa-refresh fa-spin'></i> Creating job..."
-                data-waiting-text="<i class='fa fa-refresh fa-spin'></i> Waiting in queue..."
-                data-creating-text="<i class='fa fa-refresh fa-spin'></i> Creating file..."
-                data-downloading-text="<i class='fa fa-refresh fa-spin'></i> Downloading...">
-            Create
-        </button>
-        <div id="download-link" style="display: none">
+<div id="app" class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
             <br/>
-            <a href="#">Download failed? Try again.</a>
+            <h2>Gold Visibility Color Creator</h2>
+            <br/>
+            <div class="alert alert-danger" v-for="(errorMsg, index) in errors">
+                <strong>Error!</strong> {{errorMsg}}
+                <button class="close" @click="popError(index)">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <color-input-group v-model="input" :disabled="disabled"></color-input-group>
+            <button class="btn btn-block btn-primary" @click="createJob" :disabled="disabled">
+                <span v-show="showSpinner" class="fa fa-refresh fa-spin" style="margin-right: 5px"></span>
+                {{actionText}}
+            </button>
+            <div v-show="showDownloadLink">
+                <br/>
+                <a href="#" ref="downloadLink" @click="edgeDownloadFix">Download failed? Try again.</a>
+            </div>
+            <br/>
+            <h4>Usage</h4>
+            <ol>
+                <li>Download and install the Gold Visibility Mod from
+                    <a href="https://wgmods.net/1233" target="_blank" rel="noopener">WG Mods</a> or the
+                    <a href="http://forum.worldoftanks.eu/index.php?/topic/669824-1010-gold-ammo-visibility-mod-204/"
+                       target="_blank" rel="noopener">European forum</a>. Any color will work.
+                </li>
+                <li>Select a color in the color picker above.</li>
+                <li>Optional: You can also upload an image which will replace the smoke effects.
+                    The effect will have the color selected above.
+                    For the best results the background of the image should be transparent.
+                    The recommended image format is PNG as it allows for transparency.
+                    Check out <a href="https://www.flaticon.com/" target="_blank" rel="noopener">Flaticon.com</a>
+                    for a huge selection of free shapes and icons.
+                </li>
+                <li>Click on "Create" and wait for the process to finish. <strong>This can take up to a minute!</strong>
+                </li>
+                <li>Save the generated .wotmod file to your computer.</li>
+                <li>Copy the file into your WoT /mods/&lt;current version&gt; folder.</li>
+            </ol>
+            <h4>Troubleshooting</h4>
+            <ul>
+                <li>Make sure to use a modern browser like Chrome or Firefox.</li>
+                <li>Click the link below the "Create" button should the automatic download not work.</li>
+            </ul>
         </div>
-        <br/>
-        <h4>Usage</h4>
-        <ol>
-            <li>Download and install the Gold Visibility Mod from <a href="https://wgmods.net/1233" target="_blank"
-                                                                     rel="noopener">WG
-                Mods</a> or the
-                <a href="http://forum.worldoftanks.eu/index.php?/topic/669824-1010-gold-ammo-visibility-mod-204/"
-                   target="_blank" rel="noopener">European forum</a>. Any color will work.
-            </li>
-            <li>Select a color in the color picker above.</li>
-            <li>Optional: You can also upload an image which will replace the smoke effects.
-                The effect will have the color selected above.
-                For the best results the background of the image should be transparent.
-                The recommended image format is PNG as it allows for transparency.
-                Check out <a href="https://www.flaticon.com/" target="_blank" rel="noopener">Flaticon.com</a>
-                for a huge selection of free shapes and icons.
-            </li>
-            <li>Click on "Create" and wait for the process to finish. <strong>This can take up to a minute!</strong>
-            </li>
-            <li>Save the generated .wotmod file to your computer.</li>
-            <li>Copy the file into your WoT /mods/&lt;current version&gt; folder.</li>
-        </ol>
-        <h4>Troubleshooting</h4>
-        <ul>
-            <li>Make sure to use a modern browser like Chrome or Firefox.</li>
-            <li>Click the link below the "Create" button should the automatic download not work.</li>
-        </ul>
     </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
-        integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
-        crossorigin="anonymous"></script>
-<script src="lib/jquery.minicolors.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+<script src="lib/vue-color.min.js"></script>
+<script src="components/color-picker.component.js"></script>
+<script src="components/color-input.component.js"></script>
+<script src="components/color-input-group.component.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
