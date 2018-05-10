@@ -62,7 +62,7 @@ new Vue({
                 this.setDownloading();
                 return response.blob();
             }).then(blob => {
-                this.reset();
+                this.setCreate();
                 this.saveBlob(blob);
             }).catch(this.handleError);
         },
@@ -82,14 +82,14 @@ new Vue({
             if (window.navigator.msSaveOrOpenBlob) window.navigator.msSaveOrOpenBlob(this.edgeBlob, this.FILENAME);
         },
         handleError(error) {
-            this.reset();
+            this.setCreate();
             this.pushError(error);
         },
         setButtonState(locked) {
             this.showSpinner = !!locked;
             this.disabled = !!locked;
         },
-        reset() {
+        setCreate() {
             this.actionText = 'Create';
             this.setButtonState(false);
             location.hash = '';
@@ -143,7 +143,7 @@ new Vue({
             this.setWaiting();
             this.pollStatus(location.hash.substring(1));
         } else {
-            this.reset();
+            this.setCreate();
         }
     }
 });
