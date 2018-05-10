@@ -9,7 +9,7 @@ Vue.component('color-input', {
                     </span>
                 </div>
             </div>
-            <div class="arrow" v-show="mustShow" style="z-index: 5; position: absolute; right: 0">
+            <div class="arrow" v-show="mustShow" style="z-index: 5; position: absolute; right: 0; top: 45px">
                 <color-picker style="font-family: inherit" :value="color" @input="color = $event; $emit('input', displayValue)"></color-picker>
             </div>
         </div>
