@@ -79,7 +79,7 @@ def make_texture(color=None, file=None, luminize=False):
     if file is not None:
         return make_custom_texture(file, color, luminize)
 
-    texture = Image(filename='texture.dds')
+    texture = Image(filename='mod/texture.dds')
     if color is not None:
         return multiply_color(texture, color)
 
