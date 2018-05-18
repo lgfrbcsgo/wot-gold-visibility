@@ -6,7 +6,7 @@ import ResMgr
 from functools import wraps, partial
 from items import vehicles, _xml
 from constants import ITEM_DEFS_PATH
-from helpers.EffectsList import EffectsList, _PixieEffectDesc
+from helpers.EffectsList import _PixieEffectDesc
 from helpers.bound_effects import ModelBoundEffects, StaticSceneBoundEffects
 from gui.mods.goldvisibility_prereqs import files as prerequisites
 
@@ -23,27 +23,30 @@ def load_json_from_file(file_path):
         return None
 
 
-prerequisites_holder = None
 config = load_json_from_file('res_mods/configs/goldvisibility.json') \
          or load_json_from_file('mods/configs/goldvisibility.json') \
          or {}
 
 
-def on_prerequisites_loaded(refs):
-    global prerequisites_holder
-    prerequisites_holder = refs
+class PrerequisitesLoader:
+    def __init__(self, prerequisites):
+        self._prerequisites = None
+        BigWorld.loadResourceListBG(prerequisites, self.__on_prerequisites_loaded)
+
+    def has(self, file):
+        return self._prerequisites is not None and self._prerequisites.has_key(file)
+
+    def __on_prerequisites_loaded(self, refs):
+        self._prerequisites = refs
 
 
-BigWorld.loadResourceListBG(prerequisites, on_prerequisites_loaded)
-
-
-# Keep track of mutations
 class ModifiedValueManager:
     def __init__(self):
         self._values = []
 
-    def add_value(self, container, key, restore_value):
-        self._values.append((container, key, restore_value))
+    def modify(self, container, key, value):
+        self._values.append((container, key, container[key]))
+        container[key] = value
 
     def restore(self):
         for (container, key, restore_value) in self._values:
@@ -67,7 +70,6 @@ def run_before(module, func_name):
     return decorator
 
 
-# Load shell prices for a nation
 def load_shell_prices(nation):
     xml_path = ITEM_DEFS_PATH + 'vehicles/' + nation + '/components/shells.xml'
     section = ResMgr.openSection(xml_path)
@@ -85,37 +87,35 @@ def load_shell_prices(nation):
     return prices
 
 
-# get particle effects for effects list
-def get_pixie_effects(effects_list):
-    effects_desc = effects_list._EffectsList__effectDescList
-    return [desc for desc in effects_desc if isinstance(desc, _PixieEffectDesc)]
+def get_pixie_files(effects_list):
+    effects_desc = getattr(effects_list, '_EffectsList__effectDescList')
+    for effect_desc in effects_desc:
+        if isinstance(effect_desc, _PixieEffectDesc):
+            file_container = getattr(effect_desc, '_files')
+            for (index, file_path) in enumerate(file_container):
+                yield file_container, index, file_path
+
+
+def get_shell_eff_files(effects_list):
+    for container, key, file_path in get_pixie_files(effects_list):
+        match = re.search('^particles/Shells_Eff/([a-zA-Z0-9_-]+)\.xml$', file_path)
+        if match is not None:
+            effect_name = match.group(1)
+            yield container, key, file_path, effect_name
 
 
 def get_gun(attacker_id, players):
     attacker = players.get(attacker_id, None)
-
     if attacker is None:
         return None
-
     gun, _ = attacker['vehicleType'].getComponentsByType('vehicleGun')
-
     return gun
 
 
-# return gold ammo shell types for player
+# return gold ammo shell types for gun
 def get_gold_ammo_types_from_prices(shell_prices, default_gold_ammo_types, gun):
     if gun is None:
         return default_gold_ammo_types
-
-    gold_ammo_types = []
-    for shot in gun.shots:
-        nation_id, shell_id = shot.shell.id
-        gold_price = shell_prices[nation_id][shell_id].get('gold', None)
-        if gold_price is not None:
-            gold_ammo_types.append(shot.shell.kind)
-
-    if len(gold_ammo_types) > 0:
-        return gold_ammo_types
 
     # no shell buyable with gold
     # shell is considered 'gold' if credits price is higher then the avg shell price for the gun
@@ -207,41 +207,37 @@ def shell_type_from_effect_name(effect_name):
     return shell_type
 
 
-# Restore effect and modify PixieEffectDescription file names to point to modified effects for gold shells
-def restore_with_mgr_and_modify_effect(modified_file_name_mgr, effects_list, attacker_id):
+# Restore effects and modify PixieEffectDescription file names to point to modified effects for gold shells
+def restore_effects_and_modify_effect(modified_file_name_mgr, prereq_loader, effects_list, attacker_id):
     # restore modified effects to their default
     modified_file_name_mgr.restore()
 
     player = BigWorld.player()
     players = player.arena.vehicles
-
     gun = get_gun(attacker_id, players)
     gold_ammo_types = get_gold_ammo_types(gun)
 
-    pixie_effects = get_pixie_effects(effects_list)
+    for container, key, file_path, effect_name in get_shell_eff_files(effects_list):
+        shell_type = shell_type_from_effect_name(effect_name)
 
-    for pixie_effect in pixie_effects:
-        for (index, file_path) in enumerate(pixie_effect._files):
-            match = re.search('^particles/Shells_Eff/([a-zA-Z0-9_-]+)\.xml$', file_path)
-            if match is not None:
-                effect_name = match.group(1)
-                shell_type = shell_type_from_effect_name(effect_name)
-
-                new_file_path = 'particles/Shells_Eff/' + effect_name + '_prem.xml'
-                if shell_type in gold_ammo_types and effect_must_show(player, players, shell_type, gun, attacker_id) \
-                        and prerequisites_holder is not None and prerequisites_holder.has_key(new_file_path):
-                    modified_file_name_mgr.add_value(pixie_effect._files, index, file_path)
-                    pixie_effect._files[index] = new_file_path
+        new_file_path = 'particles/Shells_Eff/' + effect_name + '_prem.xml'
+        if shell_type in gold_ammo_types and prereq_loader.has(new_file_path) \
+                and effect_must_show(player, players, shell_type, gun, attacker_id):
+            modified_file_name_mgr.modify(container, key, new_file_path)
 
 
-restore_and_modify_effect = partial(restore_with_mgr_and_modify_effect, ModifiedValueManager())
+modify_effect = partial(
+    restore_effects_and_modify_effect,
+    ModifiedValueManager(),
+    PrerequisitesLoader(prerequisites)
+)
 
 
 @run_before(StaticSceneBoundEffects, 'addNew')
 def modify_static_bound_effect(*args, **kwargs):
-    return restore_and_modify_effect(args[2], kwargs.get('attackerID', 0))
+    return modify_effect(args[2], kwargs.get('attackerID', 0))
 
 
 @run_before(ModelBoundEffects, 'addNewToNode')
 def modify_model_bound_effect(*args, **kwargs):
-    return restore_and_modify_effect(args[3], kwargs.get('attackerID', 0))
+    return modify_effect(args[3], kwargs.get('attackerID', 0))
