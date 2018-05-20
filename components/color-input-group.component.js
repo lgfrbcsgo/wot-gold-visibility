@@ -7,7 +7,7 @@ Vue.component('color-input-group', {
             <div class="form-group">
                 <label class="btn-link" style="margin: 0 10px 0 0">
                     Upload image <span class="badge badge-secondary">optional</span>
-                    <input type="file" ref="fileInput" @change="file = $event.target.files[0]" :disabled="disabled" accept="image/*" capture="camera" style="display: none">
+                    <input type="file" ref="fileInput" @change="file = $event.target.files[0]" :disabled="disabled" accept="image/*" style="display: none">
                 </label>
                 {{fileName}}
                  <span class="fa fa-trash" v-show="!!file" @click="clearFile" style="cursor: pointer"></span>
