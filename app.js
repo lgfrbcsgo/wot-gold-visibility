@@ -7,6 +7,7 @@ new Vue({
         input: {
             color: '#C000FF'
         },
+        dirty: true,
         disabled: false,
         showSpinner: false,
         showDownloadLink: false,
@@ -18,7 +19,13 @@ new Vue({
     },
     methods: {
         createJob() {
+            if (!this.dirty) {
+                this.$refs.downloadLink.click();
+                return;
+            }
+
             this.setSending();
+            this.dirty = false;
 
             const options = {method: "POST"};
             if (this.input.file) {
@@ -133,6 +140,9 @@ new Vue({
                 };
                 requestAnimationFrame(render);
             }
+        },
+        input() {
+            this.dirty = true;
         }
     },
     created() {
