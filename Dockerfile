@@ -1,13 +1,15 @@
 FROM heroku/heroku:16
 
-WORKDIR /var/app
-
 RUN apt-get update
 RUN apt-get install -y python3 python3-pip redis-server supervisor build-essential libmagick++-dev
 
-RUN wget https://www.imagemagick.org/download/ImageMagick-6.9.10-0.tar.gz
-RUN tar xvzf ImageMagick-6.9.10-0.tar.gz
+WORKDIR /home
+
+RUN wget https://www.imagemagick.org/download/releases/ImageMagick-6.9.10-0.tar.xz
+RUN tar xvf ImageMagick-6.9.10-0.tar.xz
 RUN cd ImageMagick-6.9.10-0 && ./configure && make && make install && ldconfig /usr/local/lib
+
+WORKDIR /var/app
 
 RUN pip3 install Flask==1.0.2
 RUN pip3 install -U Flask-Cors==3.0.4
