@@ -6,8 +6,8 @@ RUN apt-get update
 RUN apt-get install -y python3 python3-pip redis-server supervisor build-essential libmagick++-dev
 
 RUN wget https://www.imagemagick.org/download/ImageMagick-6.9.10-0.tar.gz
-RUN tar xvzf ImageMagick-6.9.9-42.tar.gz
-RUN cd ImageMagick-6.9.9-42 && ./configure && make && make install && ldconfig /usr/local/lib
+RUN tar xvzf ImageMagick-6.9.10-0.tar.gz
+RUN cd ImageMagick-6.9.10-0 && ./configure && make && make install && ldconfig /usr/local/lib
 
 RUN pip3 install Flask==1.0.2
 RUN pip3 install -U Flask-Cors==3.0.4
