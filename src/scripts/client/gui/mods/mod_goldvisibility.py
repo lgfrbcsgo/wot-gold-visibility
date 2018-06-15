@@ -117,9 +117,6 @@ def get_gold_ammo_types_from_prices(shell_prices, default_gold_ammo_types, gun):
     if gun is None:
         return default_gold_ammo_types
 
-    if len(gun.shots) == 1:
-        return []
-
     # no shell buyable with gold
     # shell is considered 'gold' if credits price is higher then the avg shell price for the gun
     # WG removed gold price in patch 1.0.1 for gold shells
