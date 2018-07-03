@@ -49,9 +49,6 @@ def set_color(image, color, luminize=False):
 
 def make_custom_texture(icon, color=None, luminize=False):
     with Image(blob=icon) as src:
-        if color is not None:
-            set_color(src, color, luminize)
-
         dest = transparent(4096, 4096)
 
         sizes = dict()
@@ -60,6 +57,8 @@ def make_custom_texture(icon, color=None, luminize=False):
 
         for width, height in sizes.keys():
             sizes[(width, height)] = resize(src, width, height)
+            if color is not None:
+                set_color(sizes[(width, height)], color, luminize)
 
         for width, height, bbox in sprite_layout:
             xstart, ystart, xend, yend = bbox
