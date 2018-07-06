@@ -5,9 +5,9 @@ RUN apt-get install -y python3 python3-pip redis-server supervisor build-essenti
 
 WORKDIR /home
 
-RUN wget https://www.imagemagick.org/download/releases/ImageMagick-6.9.10-5.tar.xz
-RUN tar xvf ImageMagick-6.9.10-5.tar.xz
-RUN cd ImageMagick-6.9.10-5 && ./configure && make && make install && ldconfig /usr/local/lib
+RUN wget https://github.com/ImageMagick/ImageMagick6/archive/6.9.10-4.tar.gz
+RUN tar -xvzf 6.9.10-4.tar.gz
+RUN cd ImageMagick6-6.9.10-4 && ./configure && make && make install && ldconfig /usr/local/lib
 
 WORKDIR /var/app
 
