@@ -93,7 +93,7 @@ def get_mod_status(mod_id):
 
 
 @application.route('/download/<mod_id>', methods=['GET'])
-@cross_origin()
+@cross_origin(expose_headers=['Content-Length'])
 def get_mod_result(mod_id):
     try:
         job = Job.fetch(mod_id, connection=conn)
