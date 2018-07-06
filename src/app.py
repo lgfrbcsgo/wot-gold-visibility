@@ -1,11 +1,12 @@
 import os
+import sys
 import json
 from io import BytesIO
 from rq import Queue
 from rq.job import Job
 from rq.exceptions import NoSuchJobError
 from rq_dashboard import default_settings as dashboard_settings, blueprint as dashboard_blueprint
-from flask import Flask, send_file, request, jsonify, redirect, url_for, abort
+from flask import Flask, send_file, request, jsonify, redirect, url_for, abort, make_response
 from flask_cors import cross_origin
 from flask_dance.contrib.github import make_github_blueprint, github
 from werkzeug.contrib.fixers import ProxyFix
@@ -100,7 +101,10 @@ def get_mod_result(mod_id):
         return '', 500
 
     if job.is_finished:
-        return send_file(BytesIO(job.result), as_attachment=True, attachment_filename='goldvisibility.color.wotmod')
+        result = BytesIO(job.result)
+        response = make_response(send_file(result, as_attachment=True, attachment_filename='goldvisibility.color.wotmod'))
+        response.headers['Content-Length'] = len(job.result)
+        return response
     else:
         return '', 500
 
