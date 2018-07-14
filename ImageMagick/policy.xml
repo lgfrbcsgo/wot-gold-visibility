@@ -11,7 +11,6 @@
   <policy domain="resource" name="throttle" value="0"/>
   <policy domain="resource" name="time" value="120"/>
   <policy domain="system" name="precision" value="6"/>
-  <policy domain="cache" name="shared-secret" stealth="true" value="replace with your secret phrase"/>
   <policy domain="coder" rights="none" pattern="MVG" />
   <policy domain="delegate" rights="none" pattern="HTTPS" />
   <policy domain="path" rights="none" pattern="@*"/>
