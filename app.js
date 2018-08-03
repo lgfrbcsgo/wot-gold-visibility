@@ -91,6 +91,7 @@ new Vue({
         handleError(error) {
             this.setCreate();
             this.pushError(error);
+            this.dirty = true;
         },
         setButtonState(locked) {
             this.showSpinner = !!locked;
