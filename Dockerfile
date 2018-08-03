@@ -25,10 +25,8 @@ RUN sed -i -e 's/daemonize yes/daemonize no/g' /etc/redis/redis.conf
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
 ENV PORT 8080
-ENV MAGICK_CONFIGURE_PATH /etc/ImageMagick
 
 COPY ./src /var/app
 ADD supervisor.conf /etc/supervisor.conf
-ADD ImageMagick /etc/ImageMagick
 
 CMD supervisord -c /etc/supervisor.conf
