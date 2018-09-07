@@ -24,7 +24,11 @@ RUN sed -i -e 's/daemonize yes/daemonize no/g' /etc/redis/redis.conf
 
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
+
 ENV PORT 8080
+ENV REDIS_URL redis://127.0.0.1:6379
+ENV FLASK_SECRET_KEY dev
+ENV AUTHORIZED_GH_USERS []
 
 COPY ./src /var/app
 ADD supervisor.conf /etc/supervisor.conf

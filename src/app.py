@@ -1,5 +1,4 @@
 import os
-import sys
 import json
 from io import BytesIO
 from rq import Queue
@@ -18,10 +17,10 @@ from worker import conn, redis_url
 
 
 # GitHub user IDs authorized to use the Queue Dashboard
-AUTHORIZED_USERS = json.loads(os.environ.get('AUTHORIZED_GH_USERS', '[]'))
+AUTHORIZED_USERS = json.loads(os.environ.get('AUTHORIZED_GH_USERS'))
 
 # Key set to dev will disable auth!
-SECRET_KEY = os.environ.get('FLASK_SECRET_KEY', 'dev')
+SECRET_KEY = os.environ.get('FLASK_SECRET_KEY')
 
 q = Queue(connection=conn)
 application = Flask(__name__)
