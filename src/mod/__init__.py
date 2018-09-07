@@ -86,7 +86,7 @@ def make_texture(color=None, file=None, luminize=False):
 
 
 def make_mod(color=None, file=None, luminize=False):
-    with BytesIO() as wotmod_file, BytesIO as zip_file:
+    with BytesIO() as wotmod_file, BytesIO() as zip_file:
         with make_texture(color, file, luminize) as texture, ZipFile(wotmod_file, 'w') as mod:
             mod.writestr('res/particles/content_deferred/PFX_textures/eff_tex_prem.dds', texture.make_blob())
             with resize(texture, 2048, 2048) as resized:
