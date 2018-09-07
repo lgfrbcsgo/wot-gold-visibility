@@ -101,7 +101,7 @@ def get_mod_result(mod_id):
 
     if job.is_finished:
         result = BytesIO(job.result)
-        response = make_response(send_file(result, as_attachment=True, attachment_filename='goldvisibility.color.wotmod'))
+        response = make_response(send_file(result, as_attachment=True, attachment_filename='custom_color.zip'))
         response.headers['Content-Length'] = len(job.result)
         return response
     else:

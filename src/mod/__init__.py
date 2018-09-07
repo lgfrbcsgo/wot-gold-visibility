@@ -1,5 +1,5 @@
 from io import BytesIO
-from zipfile import ZipFile
+from zipfile import ZipFile, ZIP_DEFLATED
 from wand.image import Image
 from wand.drawing import Drawing
 from wand.color import Color
@@ -86,10 +86,13 @@ def make_texture(color=None, file=None, luminize=False):
 
 
 def make_mod(color=None, file=None, luminize=False):
-    with BytesIO() as output:
-        with make_texture(color, file, luminize) as texture, ZipFile(output, 'w') as mod:
+    with BytesIO() as wotmod_file, BytesIO as zip_file:
+        with make_texture(color, file, luminize) as texture, ZipFile(wotmod_file, 'w') as mod:
             mod.writestr('res/particles/content_deferred/PFX_textures/eff_tex_prem.dds', texture.make_blob())
             with resize(texture, 2048, 2048) as resized:
                 mod.writestr('res/particles/content_forward/PFX_textures/eff_tex_prem.dds', resized.make_blob())
 
-        return output.getvalue()
+        with ZipFile(zip_file, 'w', ZIP_DEFLATED) as zip:
+            zip.writestr('goldvisibility.color.wotmod', wotmod_file.getvalue())
+
+        return zip_file.getvalue()
