@@ -3,7 +3,7 @@ new Vue({
     data: {
         SERVICE_URL: 'https://sleepy-hamlet-28159.herokuapp.com',
         POLLING_INTERVAL: 2500,
-        FILENAME: 'goldvisibility.color.wotmod',
+        FILENAME: 'goldvisibility_custom_color.zip',
         input: {
             color: '#C000FF'
         },
