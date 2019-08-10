@@ -23,6 +23,7 @@ def find_dependents(zip, dependency_regex, entry_points, targets):
             content = zipped_file.read()
             for match in dependency_regex.finditer(content):
                 dependency_graph.add_edge(node, match.group())
+                dependency_graph.add_edge(node, match.group() + 'bin')
 
     dependents = set()
     actual_targets = set()
@@ -56,8 +57,8 @@ def make_bytecode(code, file_name):
 
 def make_prereqs_module(file_paths):
     def resolve_file_name(file_path):
-        if file_path.endswith('.bin'):
-            return file_path[:-4] + '.xml'
+        if file_path.endswith('bin'):
+            return file_path[:-3]
         return file_path
 
     code = 'files=["' + '","'.join(map(resolve_file_name, file_paths)) + '"]'
@@ -76,7 +77,7 @@ def make_effects_file(zip, file_path, dependency_regex, filtered_dependencies):
         content = zipped_file.read()
         for match in dependency_regex.finditer(content):
             dependency = match.group()
-            if dependency in filtered_dependencies and content[match.end(): match.end() + 5] == (b'\x00' * 5):
+            if (dependency in filtered_dependencies or dependency + 'bin' in filtered_dependencies) and content[match.end(): match.end() + 5] == (b'\x00' * 5):
                 base_name, extension = dependency.rsplit('.', 1)
                 content = content[:match.start()] + base_name + b'_prem.' + extension + content[match.end() + 5:]
         base_name, extension = file_path.rsplit('.', 1)
@@ -115,7 +116,7 @@ def make_goldvisibility_core(particles_pkg_path):
                 'particles/content_deferred/PFX_textures/eff_tex.dds'
             ]
 
-            dependency_regex = re.compile(b'particles(\/[a-zA-Z0-9_\-.]+)+\.[a-zA-Z0-9_\-.]+')
+            dependency_regex = re.compile(b'particles(/[a-zA-Z0-9_\-.]+)+\.[a-zA-Z0-9_\-.]+')
             dependents, targets = find_dependents(zip, dependency_regex, entry_points, textures)
             dependencies = dependents + targets
 

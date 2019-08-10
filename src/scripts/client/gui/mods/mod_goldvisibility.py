@@ -98,7 +98,7 @@ def get_pixie_files(effects_list):
 
 def get_shell_eff_files(effects_list):
     for container, key, file_path in get_pixie_files(effects_list):
-        match = re.search('^particles/Shells_Eff/([a-zA-Z0-9_-]+)\.xml$', file_path)
+        match = re.search('^particles/Shells_Eff/([a-zA-Z0-9_-]+)\.eff$', file_path)
         if match is not None:
             effect_name = match.group(1)
             yield container, key, file_path, effect_name
@@ -220,7 +220,7 @@ def restore_effects_and_modify_effect(modified_file_name_mgr, prereq_loader, eff
     for container, key, file_path, effect_name in get_shell_eff_files(effects_list):
         shell_type = shell_type_from_effect_name(effect_name)
 
-        new_file_path = 'particles/Shells_Eff/' + effect_name + '_prem.xml'
+        new_file_path = 'particles/Shells_Eff/' + effect_name + '_prem.eff'
         if shell_type in gold_ammo_types and prereq_loader.has(new_file_path) \
                 and effect_must_show(player, players, shell_type, gun, attacker_id):
             modified_file_name_mgr.modify(container, key, new_file_path)
