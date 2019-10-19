@@ -1,3 +1,5 @@
+import sys
+import inspect
 import re
 import json
 import BigWorld
@@ -9,6 +11,7 @@ from constants import ITEM_DEFS_PATH
 from helpers.EffectsList import _PixieEffectDesc
 from helpers.bound_effects import ModelBoundEffects, StaticSceneBoundEffects
 from gui.mods.goldvisibility_prereqs import files as prerequisites
+from debug_utils import LOG_CURRENT_EXCEPTION, LOG_ERROR
 
 
 # load and parse json file
@@ -17,14 +20,14 @@ def load_json_from_file(file_path):
         with open(file_path, 'r') as json_file:
             # credits to https://regex101.com/r/fJ1aC6/1
             # not perfect though, "//" in strings will be matched as comments!
-            without_comments = re.sub('(\/\*[\S\s]*?\*\/)|(\/\/[^\n]*)', '', json_file.read(), flags=re.M)
+            without_comments = re.sub('(/\\*[\\S\\s]*?\\*/)|(//[^\n]*)', '', json_file.read(), flags=re.M)
             return json.loads(without_comments)
     except (IOError, ValueError):
         return None
 
 
-config = load_json_from_file('res_mods/configs/goldvisibility.json') \
-         or load_json_from_file('mods/configs/goldvisibility.json') \
+config = load_json_from_file('../res_mods/configs/goldvisibility.json') \
+         or load_json_from_file('../mods/configs/goldvisibility.json') \
          or {}
 
 
@@ -54,20 +57,33 @@ class ModifiedValueManager:
         self._values = []
 
 
-# decorator for running callback before the specified function is called
-def run_before(module, func_name):
-    def decorator(callback):
-        func = getattr(module, func_name)
+def hook(hook_handler):
+    def build_decorator(module, func_name):
+        def decorator(func):
+            orig_func = getattr(module, func_name)
 
-        @wraps(func)
-        def run_before_wrapper(*args, **kwargs):
-            callback(*args, **kwargs)
-            return func(*args, **kwargs)
+            @wraps(orig_func)
+            def func_wrapper(*args, **kwargs):
+                return hook_handler(orig_func, func, *args, **kwargs)
 
-        setattr(module, func_name, run_before_wrapper)
-        return callback
+            if inspect.ismodule(module):
+                setattr(sys.modules[module.__name__], func_name, func_wrapper)
+            elif inspect.isclass(module):
+                setattr(module, func_name, func_wrapper)
 
-    return decorator
+            return func
+        return decorator
+    return build_decorator
+
+
+@hook
+def run_before(orig_func, func, *args, **kwargs):
+    try:
+        func(*args, **kwargs)
+    except:
+        LOG_CURRENT_EXCEPTION()
+    finally:
+        return orig_func(*args, **kwargs)
 
 
 def load_shell_prices(nation):
